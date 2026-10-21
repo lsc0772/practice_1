@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2c94c">
+  <title>짱껜뽀! 아케이드</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&display=swap');
+
+    :root {
+      color-scheme: light;
+      --ink: #202422;
+      --paper: #fff8e8;
+      --red: #f05243;
+      --teal: #147c78;
+      --yellow: #f2c94c;
+      --blue: #4386c6;
+      --pink: #e987a0;
+      font-family: 'Gowun Dodum', 'Malgun Gothic', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background-color: #f6e8c9;
+      background-image: radial-gradient(#d9c89f 0.8px, transparent 0.8px);
+      background-size: 17px 17px;
+    }
+
+    button { font: inherit; }
+
+    .page {
+      width: min(100% - 32px, 1040px);
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+
+    .coin-readout, .reset-button {
+      min-height: 40px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .coin-readout {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      background: var(--paper);
+      font-family: 'Black Han Sans', sans-serif;
+    }
+
+    .coin-icon { color: #b47b12; font-size: 20px; }
+
+    .reset-button {
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .reset-button:hover { background: #ffe6dc; }
+
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 245px; gap: 22px; align-items: start; }
+
+    .cabinet-wrap { min-width: 0; }
+
+    .cabinet {
+      position: relative;
+      padding: 20px 24px 24px;
+      border: 3px solid var(--ink);
+      border-radius: 14px 14px 8px 8px;
+      background: var(--red);
+      box-shadow: 8px 9px 0 var(--ink), inset 0 0 0 5px #ff7866;
+      animation: arrive 500ms cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .cabinet::before, .cabinet::after {
+      position: absolute;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+      content: '';
+    }
+
+    .cabinet::before { left: 15px; }
+    .cabinet::after { right: 15px; }
+
+    .marquee {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 68px;
+      margin: 1px 10px 16px;
+      border: 3px solid var(--ink);
+      border-radius: 6px;
+      background: var(--yellow);
+      box-shadow: inset 0 -5px 0 #dba934;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(24px, 5vw, 36px);
+      letter-spacing: 0;
+    }
+
+    .marquee-star { color: var(--red); font-size: 22px; }
+
+    .screen-frame {
+      padding: 12px;
+      border: 4px solid var(--ink);
+      border-radius: 10px;
+      background: #ded4bd;
+      box-shadow: inset 0 0 0 3px #b7aa91;
+    }
+
+    .screen {
+      position: relative;
+      display: flex;
+      min-height: 320px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 24px;
+      border: 3px solid #111d20;
+      border-radius: 4px;
+      color: #efffdc;
+      background-color: #174d50;
+      background-image: linear-gradient(rgb(8 31 33 / 18%) 1px, transparent 1px), linear-gradient(90deg, rgb(8 31 33 / 18%) 1px, transparent 1px);
+      background-size: 5px 5px;
+      text-align: center;
+      box-shadow: inset 0 0 35px #071f20;
+    }
+
+    .screen::after {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: repeating-linear-gradient(transparent 0 3px, rgb(0 0 0 / 10%) 3px 4px);
+      content: '';
+      pointer-events: none;
+    }
+
+    .screen > * { position: relative; z-index: 1; }
+
+    .screen-kicker {
+      margin: 0 0 8px;
+      color: #f2c94c;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .screen-title {
+      margin: 0;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(30px, 7vw, 52px);
+      line-height: 1.1;
+      letter-spacing: 0;
+      text-shadow: 3px 3px 0 #0b3133;
+    }
+
+    .screen-subtitle { margin: 12px 0 0; color: #c4dfc4; font-size: 15px; }
+
+    .versus {
+      display: grid;
+      width: 100%;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 16px;
+    }
+
+    .versus[hidden] { display: none; }
+
+    .fighter { display: grid; justify-items: center; gap: 7px; }
+    .fighter-label { color: #c4dfc4; font-size: 12px; }
+    .fighter-hand { min-height: 76px; font-size: 62px; line-height: 1.1; filter: drop-shadow(3px 4px 0 #0b3133); }
+    .versus-word { color: var(--yellow); font-family: 'Black Han Sans', sans-serif; font-size: 18px; }
+    .result-line { min-height: 24px; margin: 0; color: var(--yellow); font-family: 'Black Han Sans', sans-serif; font-size: 21px; }
+
+    .screen.is-revealing .fighter-hand { animation: reveal 450ms steps(3, end); }
+
+    .cabinet-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+      padding: 20px 7px 2px;
+    }
+
+    .speaker {
+      display: grid;
+      grid-template-columns: repeat(5, 8px);
+      gap: 7px;
+      justify-content: start;
+      padding: 5px 0;
+    }
+
+    .speaker i { width: 8px; aspect-ratio: 1; border: 1px solid #742d29; border-radius: 50%; background: #a73731; }
+
+    .coin-slot-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .coin-slot {
+      width: 62px;
+      height: 14px;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      background: #301f1d;
+      box-shadow: inset 0 2px 0 #100d0c;
+    }
+
+    .slot-label { color: #351d1b; font-family: 'Black Han Sans', sans-serif; font-size: 10px; }
+
+    .coin-button {
+      display: inline-flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 22px;
+      border: 3px solid var(--ink);
+      border-radius: 5px;
+      color: var(--ink);
+      background: var(--yellow);
+      box-shadow: 0 4px 0 #98721b, 3px 6px 0 var(--ink);
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 100ms ease, box-shadow 100ms ease, filter 100ms ease;
+    }
+
+    .coin-button:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    .coin-button:active:not(:disabled) { transform: translate(2px, 4px); box-shadow: 0 0 0 #98721b, 1px 2px 0 var(--ink); }
+    .coin-button:disabled { cursor: not-allowed; filter: grayscale(.55); opacity: .7; }
+
+    .coin-button .coin-icon { font-size: 23px; }
+
+    .choice-panel {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 22px 0 0;
+    }
+
+    .choice-button {
+      display: grid;
+      width: 94px;
+      min-height: 88px;
+      place-content: center;
+      gap: 2px;
+      border: 2px solid var(--ink);
+      border-radius: 5px;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 3px 4px 0 var(--ink);
+      cursor: pointer;
+      transition: transform 100ms ease, box-shadow 100ms ease, background 100ms ease;
+    }
+
+    .choice-button:hover:not(:disabled) { transform: translateY(-3px); background: #fff; }
+    .choice-button:active:not(:disabled) { transform: translate(2px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+    .choice-button:disabled { cursor: not-allowed; opacity: .45; }
+    .choice-icon { font-size: 32px; line-height: 1.1; }
+    .choice-name { font-family: 'Black Han Sans', sans-serif; font-size: 15px; }
+
+    .side-panel {
+      padding-top: 5px;
+      animation: arrive 600ms 100ms both;
+    }
+
+    .side-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 0 11px;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 20px;
+    }
+
+    .live-dot { width: 9px; aspect-ratio: 1; border: 1px solid var(--ink); border-radius: 50%; background: #62b86b; box-shadow: 0 0 0 3px #62b86b44; }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 2px solid var(--ink);
+      background: var(--paper);
+      box-shadow: 3px 4px 0 var(--ink);
+    }
+
+    .score { padding: 13px 4px 10px; text-align: center; }
+    .score + .score { border-left: 1px solid #c9bea5; }
+    .score-value { display: block; font-family: 'Black Han Sans', sans-serif; font-size: 25px; line-height: 1; }
+    .score-label { display: block; margin-top: 6px; color: #655f53; font-size: 11px; }
+
+    .history-heading { margin: 26px 0 10px; font-family: 'Black Han Sans', sans-serif; font-size: 18px; }
+
+    .history-list {
+      display: grid;
+      gap: 7px;
+      max-height: 276px;
+      overflow-y: auto;
+      padding: 0 4px 4px 0;
+      list-style: none;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 47px;
+      padding: 5px 9px;
+      border: 1.5px solid var(--ink);
+      background: #fffaf0;
+      box-shadow: 2px 2px 0 var(--ink);
+      animation: arrive 250ms ease both;
+    }
+
+    .history-hand { font-size: 22px; }
+    .history-match { display: flex; align-items: center; gap: 5px; color: #625c51; font-size: 12px; }
+    .history-outcome { font-family: 'Black Han Sans', sans-serif; font-size: 13px; }
+    .history-outcome.win { color: #167c58; }
+    .history-outcome.lose { color: #c34437; }
+    .history-outcome.draw { color: #8e6a12; }
+    .empty-history { padding: 18px 10px; border: 1.5px dashed #84775d; color: #6d6250; text-align: center; font-size: 13px; }
+
+    .cabinet-footer {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 20px;
+    }
+
+    .footer-light { width: 8px; aspect-ratio: 1; border: 1px solid var(--ink); border-radius: 50%; background: var(--yellow); }
+    .footer-light:nth-child(2) { background: #75c9b0; }
+    .footer-light:nth-child(3) { background: #91acd8; }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes reveal { 0% { transform: scale(.5) rotate(-12deg); opacity: .2; } 70% { transform: scale(1.18) rotate(4deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 24px, 540px); padding-top: 15px; }
+      main { grid-template-columns: 1fr; gap: 25px; }
+      .cabinet { padding: 18px 14px 20px; box-shadow: 5px 6px 0 var(--ink), inset 0 0 0 5px #ff7866; }
+      .marquee { margin-inline: 9px; }
+      .screen { min-height: 285px; padding: 18px 12px; }
+      .cabinet-controls { gap: 10px; }
+      .speaker { grid-template-columns: repeat(4, 7px); gap: 6px; }
+      .speaker i { width: 7px; }
+      .side-panel { padding-top: 0; }
+      .scoreboard { max-width: 420px; }
+      .history-list { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 220px; }
+      .history-item { grid-template-columns: 24px 1fr; }
+      .history-outcome { grid-column: 2; }
+    }
+
+    @media (max-width: 390px) {
+      .brand { font-size: 17px; }
+      .reset-button { padding-inline: 9px; }
+      .cabinet { padding-inline: 11px; }
+      .screen { min-height: 260px; }
+      .choice-panel { gap: 8px; }
+      .choice-button { width: 84px; min-height: 82px; }
+      .history-list { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topline">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span> 문방구 오락실</div>
+      <div class="top-actions">
+        <div class="coin-readout" aria-live="polite"><span class="coin-icon" aria-hidden="true">●</span><span>코인</span><span id="coin-count">5</span></div>
+        <button class="reset-button" id="reset-button" type="button" aria-label="게임 초기화">다시 시작</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="cabinet-wrap" aria-label="짱껜뽀 오락기">
+        <div class="cabinet">
+          <div class="marquee"><span class="marquee-star" aria-hidden="true">★</span> 짱껜뽀! <span class="marquee-star" aria-hidden="true">★</span></div>
+          <div class="screen-frame">
+            <div class="screen" id="game-screen" aria-live="polite" aria-atomic="true">
+              <p class="screen-kicker" id="screen-kicker">READY PLAYER</p>
+              <h1 class="screen-title" id="screen-title">짱껜뽀!</h1>
+              <p class="screen-subtitle" id="screen-subtitle">오늘의 첫 승부를 시작해 볼까요?</p>
+              <div class="versus" id="versus" hidden>
+                <div class="fighter"><span class="fighter-label">나</span><span class="fighter-hand" id="player-hand">✊</span></div>
+                <span class="versus-word">VS</span>
+                <div class="fighter"><span class="fighter-label">기계</span><span class="fighter-hand" id="machine-hand">✊</span></div>
+              </div>
+              <p class="result-line" id="result-line" aria-live="polite"></p>
+            </div>
+          </div>
+          <div class="cabinet-controls">
+            <div class="speaker" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="coin-slot-wrap"><div class="coin-slot" aria-hidden="true"></div><span class="slot-label">INSERT COIN</span></div>
+            <div class="speaker" aria-hidden="true" style="justify-content:end"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="cabinet-footer" aria-hidden="true"><span class="footer-light"></span><span class="footer-light"></span><span class="footer-light"></span></div>
+        </div>
+
+        <button class="coin-button" id="coin-button" type="button" style="display:flex;margin:18px auto 0">
+          <span class="coin-icon" aria-hidden="true">●</span><span id="coin-button-label">코인 넣기</span>
+        </button>
+        <div class="choice-panel" role="group" aria-label="가위바위보 선택">
+          <button class="choice-button" type="button" data-choice="rock" disabled aria-label="바위">
+            <span class="choice-icon" aria-hidden="true">✊</span><span class="choice-name">바위</span>
+          </button>
+          <button class="choice-button" type="button" data-choice="paper" disabled aria-label="보">
+            <span class="choice-icon" aria-hidden="true">✋</span><span class="choice-name">보</span>
+          </button>
+          <button class="choice-button" type="button" data-choice="scissors" disabled aria-label="가위">
+            <span class="choice-icon" aria-hidden="true">✌️</span><span class="choice-name">가위</span>
+          </button>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="전적">
+        <h2 class="side-heading">오늘의 전적 <span class="live-dot" aria-label="기록 중"></span></h2>
+        <div class="scoreboard">
+          <div class="score"><strong class="score-value" id="wins">0</strong><span class="score-label">승리</span></div>
+          <div class="score"><strong class="score-value" id="draws">0</strong><span class="score-label">무승부</span></div>
+          <div class="score"><strong class="score-value" id="losses">0</strong><span class="score-label">패배</span></div>
+        </div>
+        <h2 class="history-heading">플레이 기록</h2>
+        <ul class="history-list" id="history-list"><li class="empty-history" id="empty-history">아직 기록이 없어요</li></ul>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const choices = {
+      rock: { label: '바위', hand: '✊' },
+      paper: { label: '보', hand: '✋' },
+      scissors: { label: '가위', hand: '✌️' }
+    };
+
+    const state = { coins: 5, inserted: false, busy: false, wins: 0, draws: 0, losses: 0 };
+    const coinCount = document.querySelector('#coin-count');
+    const coinButton = document.querySelector('#coin-button');
+    const coinButtonLabel = document.querySelector('#coin-button-label');
+    const choiceButtons = [...document.querySelectorAll('.choice-button')];
+    const screen = document.querySelector('#game-screen');
+    const historyList = document.querySelector('#history-list');
+
+    function updateControls() {
+      coinCount.textContent = state.coins;
+      coinButton.disabled = state.coins === 0 || state.inserted || state.busy;
+      document.querySelector('#reset-button').disabled = state.busy;
+      coinButtonLabel.textContent = state.inserted ? '코인 투입 완료' : state.coins === 0 ? '코인 부족' : '코인 넣기';
+      choiceButtons.forEach((button) => { button.disabled = !state.inserted || state.busy; });
+    }
+
+    function setScreen(kicker, title, subtitle, result = '') {
+      document.querySelector('#screen-kicker').textContent = kicker;
+      document.querySelector('#screen-title').textContent = title;
+      document.querySelector('#screen-subtitle').textContent = subtitle;
+      document.querySelector('#result-line').textContent = result;
+    }
+
+    coinButton.addEventListener('click', () => {
+      if (state.coins < 1 || state.inserted || state.busy) return;
+      state.coins -= 1;
+      state.inserted = true;
+      setScreen('YOUR TURN', '하나, 둘, 셋!', '기계와 승부를 겨뤄보세요');
+      document.querySelector('#versus').hidden = true;
+      updateControls();
+      choiceButtons[0].focus();
+    });
+
+    function judge(player, machine) {
+      if (player === machine) return 'draw';
+      if ((player === 'rock' && machine === 'scissors') || (player === 'paper' && machine === 'rock') || (player === 'scissors' && machine === 'paper')) return 'win';
+      return 'lose';
+    }
+
+    function addHistory(player, machine, outcome) {
+      document.querySelector('#empty-history')?.remove();
+      const item = document.createElement('li');
+      item.className = 'history-item';
+      const outcomeText = { win: '승리!', draw: '무승부', lose: '패배' }[outcome];
+      item.innerHTML = `<span class="history-hand" aria-hidden="true">${choices[player].hand}</span><span class="history-match">${choices[player].label}<span aria-hidden="true">·</span>${choices[machine].label}</span><span class="history-outcome ${outcome}">${outcomeText}</span>`;
+      historyList.prepend(item);
+    }
+
+    function play(player) {
+      if (!state.inserted || state.busy) return;
+      state.busy = true;
+      state.inserted = false;
+      const machine = Object.keys(choices)[Math.floor(Math.random() * 3)];
+      const outcome = judge(player, machine);
+      state[outcome === 'win' ? 'wins' : outcome === 'draw' ? 'draws' : 'losses'] += 1;
+
+      document.querySelector('#player-hand').textContent = choices[player].hand;
+      document.querySelector('#machine-hand').textContent = '❔';
+      document.querySelector('#versus').hidden = false;
+      screen.classList.remove('is-revealing');
+      void screen.offsetWidth;
+      screen.classList.add('is-revealing');
+      setScreen('SHOWDOWN', '승부!', '기계가 손을 냅니다...');
+      updateControls();
+
+      window.setTimeout(() => {
+        document.querySelector('#machine-hand').textContent = choices[machine].hand;
+        const resultText = { win: '이겼다!', draw: '비겼다!', lose: '아깝다!' }[outcome];
+        const finalSubtitle = state.coins === 0 ? '코인을 모두 사용했어요' : '다음 판도 도전해 보세요';
+        setScreen('RESULT', resultText, finalSubtitle, `${choices[player].label}  ·  ${choices[machine].label}`);
+        document.querySelector('#wins').textContent = state.wins;
+        document.querySelector('#draws').textContent = state.draws;
+        document.querySelector('#losses').textContent = state.losses;
+        addHistory(player, machine, outcome);
+        state.busy = false;
+        updateControls();
+      }, 650);
+    }
+
+    choiceButtons.forEach((button) => button.addEventListener('click', () => play(button.dataset.choice)));
+
+    document.querySelector('#reset-button').addEventListener('click', () => {
+      state.coins = 5;
+      state.inserted = false;
+      state.busy = false;
+      state.wins = 0;
+      state.draws = 0;
+      state.losses = 0;
+      document.querySelector('#wins').textContent = '0';
+      document.querySelector('#draws').textContent = '0';
+      document.querySelector('#losses').textContent = '0';
+      document.querySelector('#versus').hidden = true;
+      historyList.innerHTML = '<li class="empty-history" id="empty-history">아직 기록이 없어요</li>';
+      setScreen('READY PLAYER', '짱껜뽀!', '오늘의 첫 승부를 시작해 볼까요?');
+      updateControls();
+    });
+
+    updateControls();
+  </script>
+</body>
+</html>
